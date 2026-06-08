@@ -48,6 +48,9 @@ const exportButton = document.querySelector("#exportButton");
 const sharePanel = document.querySelector("#sharePanel");
 const usernameInput = document.querySelector("#usernameInput");
 const bracketBoard = document.querySelector("#bracketBoard");
+const bracketShell = document.querySelector("#bracketShell");
+const mobileRoundNav = document.querySelector("#mobileRoundNav");
+let activeMobileRound = 0;
 
 function initialState() {
   return {
@@ -483,6 +486,11 @@ function chooseWinner(roundIndex, matchIndex, winnerKey) {
 
   saveState();
   renderBracket();
+
+  const roundComplete = state.bracket.rounds[roundIndex].every((roundMatch) => roundMatch.winner);
+  if (roundComplete && roundIndex < 4 && window.matchMedia("(max-width: 700px)").matches) {
+    setTimeout(() => setMobileRound(roundIndex + 1), 180);
+  }
 }
 
 function clearAdvancementFrom(roundIndex, matchIndex) {
@@ -523,9 +531,9 @@ function renderBracket() {
 
   bracketBoard.innerHTML = `
     <svg class="bracket-connectors" id="bracketConnectors" aria-hidden="true"></svg>
-    ${left.map((matches, roundIndex) => renderRoundColumn(matches, roundIndex, false)).join("")}
+    ${left.map((matches, roundIndex) => renderRoundColumn(matches, roundIndex, false, roundIndex)).join("")}
     ${renderFinalColumn(rounds[4][0])}
-    ${right.map((matches, visualIndex) => renderRoundColumn(matches, 3 - visualIndex, true)).join("")}
+    ${right.map((matches, visualIndex) => renderRoundColumn(matches, 3 - visualIndex, true, 3 - visualIndex)).join("")}
   `;
 
   bracketBoard.querySelectorAll(".match-team[data-team]").forEach((button) => {
@@ -539,12 +547,13 @@ function renderBracket() {
     ? `${teamName(champion)} بطل توقعاتك`
     : "اختر الفائز في كل مباراة";
   sharePanel.hidden = !champion;
+  updateMobileRoundNavigation();
   requestAnimationFrame(drawBracketConnectors);
 }
 
-function renderRoundColumn(matches, roundIndex, rightSide) {
+function renderRoundColumn(matches, roundIndex, rightSide, mobileRound) {
   return `
-    <div class="round-column ${rightSide ? "right-side" : ""}">
+    <div class="round-column ${rightSide ? "right-side" : ""}" data-mobile-round="${mobileRound}">
       ${matches.map((match) => {
         const actualIndex = state.bracket.rounds[roundIndex].indexOf(match);
         return renderMatch(match, roundIndex, actualIndex);
@@ -557,7 +566,7 @@ function renderFinalColumn(match) {
   const champion = state.bracket.champion ? findTeam(state.bracket.champion) : null;
 
   return `
-    <div class="round-column final-column">
+    <div class="round-column final-column" data-mobile-round="4">
       <div class="trophy">
         ${champion
           ? `<img class="winner-trophy" src="trophy.png" alt="كأس العالم 2026">
@@ -601,6 +610,32 @@ function renderMatch(match, roundIndex, matchIndex) {
       }).join("")}
     </div>
   `;
+}
+
+function setMobileRound(roundIndex) {
+  activeMobileRound = roundIndex;
+  bracketShell.dataset.mobileRound = String(roundIndex);
+  mobileRoundNav.querySelectorAll("button").forEach((button) => {
+    const active = Number(button.dataset.mobileRound) === roundIndex;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "step" : "false");
+  });
+  bracketShell.scrollTo({ left: 0, behavior: "smooth" });
+}
+
+function updateMobileRoundNavigation() {
+  if (!state.bracket) return;
+
+  mobileRoundNav.querySelectorAll("button").forEach((button) => {
+    const roundIndex = Number(button.dataset.mobileRound);
+    const round = state.bracket.rounds[roundIndex];
+    const completed = round.every((match) => match.winner);
+    const available = roundIndex === 0 || round.some((match) => match.teams.some(Boolean));
+    button.classList.toggle("complete", completed);
+    button.disabled = !available;
+  });
+
+  setMobileRound(activeMobileRound);
 }
 
 function drawBracketConnectors() {
@@ -1001,6 +1036,9 @@ editGroupsButton.addEventListener("click", () => showView("groups"));
 exportButton.addEventListener("click", exportBracketPng);
 usernameInput.addEventListener("input", () => {
   localStorage.setItem("road-to-26-username", usernameInput.value);
+});
+mobileRoundNav.querySelectorAll("button").forEach((button) => {
+  button.addEventListener("click", () => setMobileRound(Number(button.dataset.mobileRound)));
 });
 window.addEventListener("resize", () => {
   if (state.bracket) requestAnimationFrame(drawBracketConnectors);
