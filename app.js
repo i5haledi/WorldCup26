@@ -50,7 +50,6 @@ const usernameInput = document.querySelector("#usernameInput");
 const bracketBoard = document.querySelector("#bracketBoard");
 const bracketShell = document.querySelector("#bracketShell");
 const mobileRoundNav = document.querySelector("#mobileRoundNav");
-const mobileBracketTree = document.querySelector("#mobileBracketTree");
 let activeMobileRound = 0;
 
 function initialState() {
@@ -537,9 +536,7 @@ function renderBracket() {
     ${right.map((matches, visualIndex) => renderRoundColumn(matches, 3 - visualIndex, true, 3 - visualIndex)).join("")}
   `;
 
-  renderMobileBracketTree();
   bindMatchSelection(bracketBoard);
-  bindMatchSelection(mobileBracketTree);
 
   const champion = state.bracket.champion ? findTeam(state.bracket.champion) : null;
   document.querySelector("#bracketStatus").textContent = champion
@@ -613,15 +610,21 @@ function renderMatch(match, roundIndex, matchIndex) {
 
 function setMobileRound(roundIndex) {
   activeMobileRound = roundIndex;
-  bracketShell.dataset.mobileRound = String(roundIndex);
   mobileRoundNav.querySelectorAll("button").forEach((button) => {
     const active = Number(button.dataset.mobileRound) === roundIndex;
     button.classList.toggle("active", active);
     button.setAttribute("aria-current", active ? "step" : "false");
   });
-  renderMobileBracketTree();
-  bindMatchSelection(mobileBracketTree);
-  window.scrollTo({ top: mobileRoundNav.offsetTop - 76, behavior: "smooth" });
+
+  const visualColumnIndexes = [0, 1, 2, 3, 4];
+  const columns = [...bracketBoard.querySelectorAll(".round-column")];
+  const targetColumn = columns[visualColumnIndexes[roundIndex]];
+  if (!targetColumn) return;
+
+  const targetCenter = targetColumn.offsetLeft + targetColumn.offsetWidth / 2;
+  const maxScroll = bracketShell.scrollWidth - bracketShell.clientWidth;
+  const targetScroll = Math.max(0, Math.min(maxScroll, targetCenter - bracketShell.clientWidth / 2));
+  bracketShell.scrollTo({ left: targetScroll, behavior: "smooth" });
 }
 
 function updateMobileRoundNavigation() {
@@ -637,67 +640,6 @@ function updateMobileRoundNavigation() {
   });
 
   setMobileRound(activeMobileRound);
-}
-
-function renderMobileBracketTree() {
-  if (!state.bracket) {
-    mobileBracketTree.innerHTML = "";
-    return;
-  }
-
-  const roundNames = ["دور الـ32", "دور الـ16", "ربع النهائي", "نصف النهائي", "النهائي"];
-  const matches = state.bracket.rounds[activeMobileRound];
-
-  if (activeMobileRound === 4) {
-    mobileBracketTree.innerHTML = `
-      <section class="mobile-final-tree">
-        <span class="mobile-tree-round">${roundNames[activeMobileRound]}</span>
-        ${renderMatch(matches[0], 4, 0)}
-        <div class="mobile-champion-arrow"></div>
-        ${renderMobileChampion()}
-      </section>
-    `;
-  } else {
-    const nextRound = state.bracket.rounds[activeMobileRound + 1];
-    mobileBracketTree.innerHTML = matches.reduce((sections, match, index) => {
-      if (index % 2 !== 0) return sections;
-      const secondMatch = matches[index + 1];
-      const targetMatch = nextRound[Math.floor(index / 2)];
-
-      return `${sections}
-        <section class="mobile-tree-branch">
-          <div class="mobile-feeders">
-            ${renderMatch(match, activeMobileRound, index)}
-            ${renderMatch(secondMatch, activeMobileRound, index + 1)}
-          </div>
-          <div class="mobile-merge-lines" aria-hidden="true">
-            <i></i><span></span><i></i>
-          </div>
-          <div class="mobile-target">
-            <small>الفائزان يتأهلان إلى ${roundNames[activeMobileRound + 1]}</small>
-            ${renderMatch(targetMatch, activeMobileRound + 1, Math.floor(index / 2))}
-          </div>
-        </section>
-      `;
-    }, "");
-  }
-
-}
-
-function renderMobileChampion() {
-  const champion = state.bracket.champion ? findTeam(state.bracket.champion) : null;
-  if (!champion) {
-    return `<div class="mobile-champion pending">اختر بطل كأس العالم</div>`;
-  }
-
-  return `
-    <div class="mobile-champion">
-      <img class="mobile-trophy" src="trophy.png" alt="كأس العالم 2026">
-      <img class="mobile-champion-flag" src="${flagUrl(champion.code)}" alt="علم ${teamName(champion)}">
-      <small>بطل العالم</small>
-      <strong>${teamName(champion)}</strong>
-    </div>
-  `;
 }
 
 function bindMatchSelection(container) {
@@ -1109,6 +1051,33 @@ usernameInput.addEventListener("input", () => {
 });
 mobileRoundNav.querySelectorAll("button").forEach((button) => {
   button.addEventListener("click", () => setMobileRound(Number(button.dataset.mobileRound)));
+});
+let mobileScrollTimer;
+bracketShell.addEventListener("scroll", () => {
+  if (!window.matchMedia("(max-width: 700px)").matches) return;
+  clearTimeout(mobileScrollTimer);
+  mobileScrollTimer = setTimeout(() => {
+    const columns = [...bracketBoard.querySelectorAll(".round-column")].slice(0, 5);
+    const viewportCenter = bracketShell.scrollLeft + bracketShell.clientWidth / 2;
+    let nearestRound = 0;
+    let nearestDistance = Infinity;
+
+    columns.forEach((column, index) => {
+      const center = column.offsetLeft + column.offsetWidth / 2;
+      const distance = Math.abs(center - viewportCenter);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestRound = index;
+      }
+    });
+
+    activeMobileRound = nearestRound;
+    mobileRoundNav.querySelectorAll("button").forEach((button) => {
+      const active = Number(button.dataset.mobileRound) === nearestRound;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-current", active ? "step" : "false");
+    });
+  }, 90);
 });
 window.addEventListener("resize", () => {
   if (state.bracket) requestAnimationFrame(drawBracketConnectors);

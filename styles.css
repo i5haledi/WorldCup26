@@ -810,10 +810,6 @@ h2 {
   display: none;
 }
 
-.mobile-bracket-tree {
-  display: none;
-}
-
 .bracket-shell {
   border: 1px solid var(--line);
   border-radius: 22px;
@@ -1244,39 +1240,63 @@ h2 {
   }
 
   .bracket-shell {
-    display: none;
+    border-radius: 15px;
+    direction: ltr;
+    margin: 0 -12px;
+    overscroll-behavior: contain;
+    overflow: auto;
+    padding: 0 12px 18px;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-color: rgba(0, 213, 140, 0.5) rgba(255, 255, 255, 0.04);
+    scrollbar-width: thin;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .mobile-bracket-tree {
-    display: grid;
-    gap: 22px;
-  }
-
-  .mobile-tree-branch,
-  .mobile-final-tree {
-    background:
-      linear-gradient(145deg, rgba(15, 24, 33, 0.92), rgba(8, 14, 20, 0.96));
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    overflow: hidden;
-    padding: 14px;
-  }
-
-  .mobile-final-tree {
-    display: grid;
-    gap: 10px;
-  }
-
-  .mobile-tree-round {
-    color: var(--green);
-    font-size: 10px;
-    font-weight: 800;
+  .bracket-shell::after {
+    color: var(--muted);
+    content: "اسحب يميناً ويساراً لاستكشاف شجرة البطولة";
+    direction: rtl;
+    display: block;
+    font-size: 9px;
+    padding: 10px 0 0;
+    position: sticky;
+    right: 18px;
     text-align: center;
+    width: calc(100vw - 68px);
   }
 
-  .mobile-feeders {
-    display: grid;
-    gap: 10px;
+  .round-labels,
+  .bracket-board {
+    min-width: 1120px;
+  }
+
+  .round-labels {
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 8;
+  }
+
+  .round-labels span {
+    font-size: 7px;
+    scroll-snap-align: center;
+  }
+
+  .bracket-board {
+    min-height: 720px;
+    padding: 16px 0;
+  }
+
+  .bracket-connectors {
+    display: block;
+  }
+
+  .round-column {
+    display: flex;
+    padding: 0 6px;
+    scroll-snap-align: center;
   }
 
   .match-card {
@@ -1284,68 +1304,6 @@ h2 {
     border-radius: 13px;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
     padding-top: 20px;
-    width: 100%;
-  }
-
-  .mobile-merge-lines {
-    height: 46px;
-    margin: 0 30px;
-    position: relative;
-  }
-
-  .mobile-merge-lines i {
-    border-color: var(--green);
-    border-style: solid;
-    bottom: 22px;
-    position: absolute;
-    top: -1px;
-    width: calc(50% - 1px);
-  }
-
-  .mobile-merge-lines i:first-child {
-    border-radius: 0 0 10px 0;
-    border-width: 0 2px 2px 0;
-    right: 0;
-  }
-
-  .mobile-merge-lines i:last-child {
-    border-radius: 0 0 0 10px;
-    border-width: 0 0 2px 2px;
-    left: 0;
-  }
-
-  .mobile-merge-lines span {
-    background: var(--green);
-    bottom: 0;
-    height: 24px;
-    left: calc(50% - 1px);
-    position: absolute;
-    width: 2px;
-  }
-
-  .mobile-target {
-    background: rgba(0, 213, 140, 0.045);
-    border: 1px solid rgba(0, 213, 140, 0.16);
-    border-radius: 14px;
-    padding: 9px;
-  }
-
-  .mobile-target > small {
-    color: var(--green);
-    display: block;
-    font-size: 8px;
-    font-weight: 800;
-    margin-bottom: 7px;
-    text-align: center;
-  }
-
-  .mobile-target .match-team {
-    pointer-events: none;
-  }
-
-  .mobile-target .match-card {
-    background: rgba(8, 18, 19, 0.9);
-    box-shadow: none;
   }
 
   .match-number {
@@ -1355,20 +1313,19 @@ h2 {
   }
 
   .match-team {
-    gap: 12px;
-    grid-template-columns: 38px minmax(0, 1fr);
-    min-height: 54px;
-    padding: 10px 12px;
+    gap: 7px;
+    grid-template-columns: 28px minmax(0, 1fr);
+    min-height: 42px;
+    padding: 7px;
   }
 
   .mini-flag {
-    border-radius: 6px;
-    height: 25px;
-    width: 38px;
+    height: 19px;
+    width: 28px;
   }
 
   .match-team span {
-    font-size: 12px;
+    font-size: 9px;
   }
 
   .match-team.winner {
@@ -1379,81 +1336,19 @@ h2 {
     gap: 14px;
   }
 
-  .mobile-champion-arrow {
-    background: var(--green);
-    height: 32px;
-    justify-self: center;
-    position: relative;
-    width: 2px;
-  }
-
-  .mobile-champion-arrow::after {
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 7px solid var(--green);
-    bottom: -1px;
-    content: "";
-    left: -4px;
-    position: absolute;
-  }
-
-  .mobile-champion {
-    align-items: center;
-    background: rgba(214, 255, 94, 0.06);
-    border: 1px solid rgba(214, 255, 94, 0.24);
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    min-height: 220px;
-    padding: 18px;
-    text-align: center;
-  }
-
-  .mobile-champion.pending {
-    color: var(--muted);
-    font-size: 12px;
-    justify-content: center;
-  }
-
-  .mobile-trophy {
-    height: 118px;
-    object-fit: contain;
-    width: 118px;
-  }
-
-  .mobile-champion-flag {
-    border: 1px solid var(--line-strong);
-    border-radius: 7px;
-    height: 39px;
-    margin: 9px 0;
-    object-fit: cover;
-    width: 59px;
-  }
-
-  .mobile-champion small {
-    color: var(--gold);
-    font-size: 9px;
-    font-weight: 800;
-  }
-
-  .mobile-champion strong {
-    font-size: 20px;
-    margin-top: 4px;
-  }
-
   .trophy {
-    min-height: 240px;
-    padding: 18px 0 6px;
+    min-height: 180px;
+    padding: 10px 0 4px;
   }
 
   .winner-trophy {
-    height: 148px;
-    width: 148px;
+    height: 112px;
+    width: 112px;
   }
 
   .champion-flag {
-    height: 54px;
-    width: 81px;
+    height: 42px;
+    width: 62px;
   }
 
   .share-panel {
