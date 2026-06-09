@@ -831,6 +831,14 @@ h2 {
   z-index: 2;
 }
 
+.match-card.waiting {
+  border-style: dashed;
+}
+
+.match-card.waiting .match-team {
+  cursor: not-allowed;
+}
+
 .match-number {
   color: #53606c;
   font-size: 7px;

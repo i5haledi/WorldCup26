@@ -451,6 +451,12 @@ function createEmptyRound(matchNumbers) {
 
 function chooseWinner(roundIndex, matchIndex, winnerKey) {
   const match = state.bracket.rounds[roundIndex][matchIndex];
+  const matchReady = match.teams.every(Boolean);
+  if (!matchReady || !match.teams.includes(winnerKey)) {
+    showToast("يجب اكتمال طرفي المباراة قبل اختيار الفائز.");
+    return;
+  }
+
   clearAdvancementFrom(roundIndex, matchIndex);
   match.winner = winnerKey;
 
@@ -561,8 +567,10 @@ function renderFinalColumn(match) {
 }
 
 function renderMatch(match, roundIndex, matchIndex) {
+  const matchReady = match.teams.every(Boolean);
+
   return `
-    <div class="match-card" data-round="${roundIndex}" data-match="${matchIndex}">
+    <div class="match-card ${matchReady ? "" : "waiting"}" data-round="${roundIndex}" data-match="${matchIndex}">
       ${match.number ? `<span class="match-number">M${match.number}</span>` : ""}
       ${match.teams.map((key) => {
         const team = key ? findTeam(key) : null;
@@ -572,7 +580,10 @@ function renderMatch(match, roundIndex, matchIndex) {
           <button
             type="button"
             class="match-team ${isWinner ? "winner" : ""}"
-            ${team ? `data-team="${key}" data-round="${roundIndex}" data-match="${matchIndex}"` : "disabled"}
+            ${team && matchReady
+              ? `data-team="${key}" data-round="${roundIndex}" data-match="${matchIndex}"`
+              : "disabled"
+            }
           >
             ${team
               ? `<span class="mini-flag"><img src="${flagUrl(team.code)}" alt="علم ${teamName(team)}"></span>
