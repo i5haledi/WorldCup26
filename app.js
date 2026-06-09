@@ -486,11 +486,6 @@ function chooseWinner(roundIndex, matchIndex, winnerKey) {
 
   saveState();
   renderBracket();
-
-  const roundComplete = state.bracket.rounds[roundIndex].every((roundMatch) => roundMatch.winner);
-  if (roundComplete && roundIndex < 4 && window.matchMedia("(max-width: 700px)").matches) {
-    setTimeout(() => setMobileRound(roundIndex + 1), 180);
-  }
 }
 
 function clearAdvancementFrom(roundIndex, matchIndex) {
@@ -515,6 +510,8 @@ function renderBracket() {
     return;
   }
 
+  const previousScrollLeft = bracketShell.scrollLeft;
+  const previousScrollTop = bracketShell.scrollTop;
   const rounds = state.bracket.rounds;
   const left = [
     rounds[0].slice(0, 8),
@@ -544,7 +541,11 @@ function renderBracket() {
     : "اختر الفائز في كل مباراة";
   sharePanel.hidden = !champion;
   updateMobileRoundNavigation();
-  requestAnimationFrame(drawBracketConnectors);
+  requestAnimationFrame(() => {
+    bracketShell.scrollLeft = previousScrollLeft;
+    bracketShell.scrollTop = previousScrollTop;
+    drawBracketConnectors();
+  });
 }
 
 function renderRoundColumn(matches, roundIndex, rightSide, mobileRound) {
@@ -639,7 +640,11 @@ function updateMobileRoundNavigation() {
     button.disabled = !available;
   });
 
-  setMobileRound(activeMobileRound);
+  mobileRoundNav.querySelectorAll("button").forEach((button) => {
+    const active = Number(button.dataset.mobileRound) === activeMobileRound;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "step" : "false");
+  });
 }
 
 function bindMatchSelection(container) {
@@ -1051,33 +1056,6 @@ usernameInput.addEventListener("input", () => {
 });
 mobileRoundNav.querySelectorAll("button").forEach((button) => {
   button.addEventListener("click", () => setMobileRound(Number(button.dataset.mobileRound)));
-});
-let mobileScrollTimer;
-bracketShell.addEventListener("scroll", () => {
-  if (!window.matchMedia("(max-width: 700px)").matches) return;
-  clearTimeout(mobileScrollTimer);
-  mobileScrollTimer = setTimeout(() => {
-    const columns = [...bracketBoard.querySelectorAll(".round-column")].slice(0, 5);
-    const viewportCenter = bracketShell.scrollLeft + bracketShell.clientWidth / 2;
-    let nearestRound = 0;
-    let nearestDistance = Infinity;
-
-    columns.forEach((column, index) => {
-      const center = column.offsetLeft + column.offsetWidth / 2;
-      const distance = Math.abs(center - viewportCenter);
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestRound = index;
-      }
-    });
-
-    activeMobileRound = nearestRound;
-    mobileRoundNav.querySelectorAll("button").forEach((button) => {
-      const active = Number(button.dataset.mobileRound) === nearestRound;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-current", active ? "step" : "false");
-    });
-  }, 90);
 });
 window.addEventListener("resize", () => {
   if (state.bracket) requestAnimationFrame(drawBracketConnectors);

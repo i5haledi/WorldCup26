@@ -1243,11 +1243,9 @@ h2 {
     border-radius: 15px;
     direction: ltr;
     margin: 0 -12px;
-    overscroll-behavior: contain;
+    overscroll-behavior: auto;
     overflow: auto;
     padding: 0 12px 18px;
-    scroll-behavior: smooth;
-    scroll-snap-type: x proximity;
     scrollbar-color: rgba(0, 213, 140, 0.5) rgba(255, 255, 255, 0.04);
     scrollbar-width: thin;
     touch-action: pan-x pan-y;
@@ -1281,7 +1279,6 @@ h2 {
 
   .round-labels span {
     font-size: 7px;
-    scroll-snap-align: center;
   }
 
   .bracket-board {
@@ -1296,7 +1293,6 @@ h2 {
   .round-column {
     display: flex;
     padding: 0 6px;
-    scroll-snap-align: center;
   }
 
   .match-card {
