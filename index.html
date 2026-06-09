@@ -68,10 +68,10 @@
 
         <div class="groups-grid" id="groupsGrid"></div>
 
-        <div class="groups-complete-action" id="groupsCompleteAction" hidden>
-          <strong>اكتملت اختياراتك</strong>
-          <span>يمكنك الآن الانتقال إلى الأدوار الإقصائية واختيار بطل العالم.</span>
-          <button class="primary-button" id="buildBracketButton" type="button">
+        <div class="groups-complete-action" id="groupsCompleteAction">
+          <strong id="groupsActionTitle">أكمل اختيارات المجموعات</strong>
+          <span id="groupsActionMessage">اختر ترتيب المنتخبات في جميع المجموعات أولاً.</span>
+          <button class="primary-button" id="buildBracketButton" type="button" disabled>
             أنشئ الأدوار الإقصائية
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
           </button>
@@ -109,22 +109,32 @@
           <div class="bracket-board" id="bracketBoard"></div>
         </div>
 
-        <div class="share-panel" id="sharePanel" hidden>
-          <p>احفظ الصورة لمشاركتها</p>
-          <label for="usernameInput">اسمك في صورة التوقعات</label>
-          <input
-            id="usernameInput"
-            type="text"
-            maxlength="32"
-            autocomplete="name"
-            placeholder="اكتب اسمك هنا"
-          >
-          <button class="export-button share-export-button" id="exportButton" type="button">
-            حفظ كصورة PNG
-          </button>
-        </div>
+        <button class="open-share-button" id="openShareButton" type="button" hidden>
+          احفظ الصورة لمشاركتها
+        </button>
       </section>
     </main>
+
+    <div class="share-modal" id="shareModal" hidden>
+      <button class="share-modal-backdrop" id="shareModalBackdrop" type="button" aria-label="إغلاق النافذة"></button>
+      <section class="share-panel" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+        <button class="share-modal-close" id="shareModalClose" type="button" aria-label="إغلاق">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg>
+        </button>
+        <p id="shareModalTitle">احفظ الصورة لمشاركتها</p>
+        <label for="usernameInput">اسمك في صورة التوقعات</label>
+        <input
+          id="usernameInput"
+          type="text"
+          maxlength="32"
+          autocomplete="name"
+          placeholder="اكتب اسمك هنا"
+        >
+        <button class="export-button share-export-button" id="exportButton" type="button">
+          حفظ كصورة PNG
+        </button>
+      </section>
+    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

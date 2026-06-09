@@ -657,8 +657,8 @@ h2 {
 
 .groups-complete-action {
   align-items: center;
-  background: rgba(0, 213, 140, 0.055);
-  border: 1px solid rgba(0, 213, 140, 0.2);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
   border-radius: 18px;
   display: grid;
   gap: 7px;
@@ -669,12 +669,8 @@ h2 {
   text-align: center;
 }
 
-.groups-complete-action[hidden] {
-  display: none;
-}
-
 .groups-complete-action strong {
-  color: var(--green);
+  color: var(--text);
   font-size: 16px;
 }
 
@@ -683,6 +679,15 @@ h2 {
   font-size: 10px;
   line-height: 1.8;
   margin-bottom: 7px;
+}
+
+.groups-complete-action.ready {
+  background: rgba(0, 213, 140, 0.055);
+  border-color: rgba(0, 213, 140, 0.2);
+}
+
+.groups-complete-action.ready strong {
+  color: var(--green);
 }
 
 .primary-button {
@@ -962,6 +967,50 @@ h2 {
   width: 128px;
 }
 
+.open-share-button {
+  background: var(--gold);
+  border: 0;
+  border-radius: 12px;
+  color: #07100b;
+  cursor: pointer;
+  display: block;
+  font: 800 12px "Cairo", sans-serif;
+  margin: 28px auto 0;
+  padding: 14px 24px;
+  transition: 0.2s ease;
+}
+
+.open-share-button[hidden] {
+  display: none;
+}
+
+.open-share-button:hover {
+  background: #e4ff8e;
+  transform: translateY(-1px);
+}
+
+.share-modal {
+  display: grid;
+  inset: 0;
+  padding: 20px;
+  place-items: center;
+  position: fixed;
+  z-index: 100;
+}
+
+.share-modal[hidden] {
+  display: none;
+}
+
+.share-modal-backdrop {
+  backdrop-filter: blur(8px);
+  background: rgba(2, 7, 11, 0.78);
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  position: absolute;
+}
+
 .share-panel {
   align-items: stretch;
   background: linear-gradient(145deg, rgba(18, 27, 37, 0.98), rgba(10, 16, 23, 0.98));
@@ -969,14 +1018,42 @@ h2 {
   border-radius: 20px;
   display: grid;
   gap: 12px;
-  margin: 28px auto 0;
-  max-width: 520px;
+  max-width: 480px;
   padding: 24px;
+  position: relative;
   text-align: center;
+  width: 100%;
+  z-index: 1;
 }
 
-.share-panel[hidden] {
-  display: none;
+.share-modal-close {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  left: 16px;
+  position: absolute;
+  top: 16px;
+  width: 32px;
+}
+
+.share-modal-close:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.share-modal-close svg {
+  fill: none;
+  height: 14px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+  width: 14px;
 }
 
 .share-panel p {
@@ -1013,6 +1090,10 @@ h2 {
   font-size: 12px;
   margin-top: 4px;
   padding: 14px 18px;
+}
+
+body.modal-open {
+  overflow: hidden;
 }
 
 .toast {
@@ -1287,7 +1368,6 @@ h2 {
 
   .share-panel {
     border-radius: 15px;
-    margin-top: 18px;
     padding: 20px 16px;
   }
 }

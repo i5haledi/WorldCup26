@@ -46,7 +46,12 @@ const quickFillButton = document.querySelector("#quickFillButton");
 const resetButton = document.querySelector("#resetButton");
 const editGroupsButton = document.querySelector("#editGroupsButton");
 const exportButton = document.querySelector("#exportButton");
-const sharePanel = document.querySelector("#sharePanel");
+const groupsActionTitle = document.querySelector("#groupsActionTitle");
+const groupsActionMessage = document.querySelector("#groupsActionMessage");
+const openShareButton = document.querySelector("#openShareButton");
+const shareModal = document.querySelector("#shareModal");
+const shareModalClose = document.querySelector("#shareModalClose");
+const shareModalBackdrop = document.querySelector("#shareModalBackdrop");
 const usernameInput = document.querySelector("#usernameInput");
 const bracketBoard = document.querySelector("#bracketBoard");
 const bracketShell = document.querySelector("#bracketShell");
@@ -333,8 +338,40 @@ function toggleWildcard(groupLetter) {
 
 function updateProgress() {
   const completeGroups = GROUPS.filter((group) => (state.picks[group.letter] || []).length === 4).length;
+  const remainingGroups = GROUPS.length - completeGroups;
+  const remainingThirds = 8 - state.wildcards.length;
   const ready = completeGroups === 12 && state.wildcards.length === 8;
-  groupsCompleteAction.hidden = !ready;
+
+  buildBracketButton.disabled = !ready;
+  groupsCompleteAction.classList.toggle("ready", ready);
+
+  if (ready) {
+    groupsActionTitle.textContent = "اكتملت اختياراتك";
+    groupsActionMessage.textContent = "يمكنك الآن الانتقال إلى الأدوار الإقصائية واختيار بطل العالم.";
+    return;
+  }
+
+  groupsActionTitle.textContent = "أكمل اختيارات المجموعات";
+  if (remainingGroups && remainingThirds) {
+    groupsActionMessage.textContent =
+      `تبقى ${formatRemainingGroups(remainingGroups)}، و${formatRemainingThirds(remainingThirds)}.`;
+  } else if (remainingGroups) {
+    groupsActionMessage.textContent = `تبقى ${formatRemainingGroups(remainingGroups)} لإكمال ترتيبها.`;
+  } else {
+    groupsActionMessage.textContent = `تبقى ${formatRemainingThirds(remainingThirds)} لاختيارها.`;
+  }
+}
+
+function formatRemainingGroups(count) {
+  if (count === 1) return "مجموعة واحدة";
+  if (count === 2) return "مجموعتان";
+  return `${count} مجموعات`;
+}
+
+function formatRemainingThirds(count) {
+  if (count === 1) return "منتخب واحد من أصحاب المركز الثالث";
+  if (count === 2) return "منتخبان من أصحاب المركز الثالث";
+  return `${count} منتخبات من أصحاب المركز الثالث`;
 }
 
 function quickFill() {
@@ -369,6 +406,8 @@ function getQualifiers() {
 }
 
 function buildBracket() {
+  if (buildBracketButton.disabled) return;
+
   const { winners, runnersUp, thirds } = getQualifiers();
   const thirdAssignments = getOfficialThirdPlaceAssignments(Object.keys(thirds));
   const match = (number, teamA, teamB) => ({
@@ -408,6 +447,7 @@ function buildBracket() {
       createEmptyRound([104]),
     ],
     champion: null,
+    sharePromptShown: false,
   };
 
   saveState();
@@ -472,7 +512,10 @@ function chooseWinner(roundIndex, matchIndex, winnerKey) {
 }
 
 function clearAdvancementFrom(roundIndex, matchIndex) {
-  if (!state.bracket || roundIndex >= state.bracket.rounds.length - 1) {
+  if (!state.bracket) return;
+
+  state.bracket.sharePromptShown = false;
+  if (roundIndex >= state.bracket.rounds.length - 1) {
     state.bracket.champion = null;
     return;
   }
@@ -489,7 +532,8 @@ function clearAdvancementFrom(roundIndex, matchIndex) {
 function renderBracket() {
   if (!state.bracket) {
     bracketBoard.innerHTML = emptyBracketMessage();
-    sharePanel.hidden = true;
+    openShareButton.hidden = true;
+    closeShareModal();
     return;
   }
 
@@ -522,7 +566,14 @@ function renderBracket() {
   document.querySelector("#bracketStatus").textContent = champion
     ? `${teamName(champion)} بطل توقعاتك`
     : "اختر الفائز في كل مباراة";
-  sharePanel.hidden = !champion;
+  openShareButton.hidden = !champion;
+  if (champion && !state.bracket.sharePromptShown) {
+    state.bracket.sharePromptShown = true;
+    saveState();
+    openShareModal();
+  } else if (!champion) {
+    closeShareModal();
+  }
   updateMobileRoundNavigation();
   requestAnimationFrame(() => {
     bracketShell.scrollLeft = previousScrollLeft;
@@ -696,6 +747,18 @@ function emptyBracketMessage() {
   `;
 }
 
+function openShareModal() {
+  if (!state.bracket?.champion) return;
+  shareModal.hidden = false;
+  document.body.classList.add("modal-open");
+  window.setTimeout(() => usernameInput.focus(), 0);
+}
+
+function closeShareModal() {
+  shareModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
 async function exportBracketPng() {
   if (!state.bracket?.champion) return;
 
@@ -718,6 +781,7 @@ async function exportBracketPng() {
     const canvas = createExportCanvas(flagImages, logo, trophyImage);
     await downloadCanvas(canvas, "توقعات-كأس-العالم-2026.png");
     showToast("تم حفظ صورة توقعاتك بنجاح.");
+    closeShareModal();
   } catch (error) {
     console.warn(error);
 
@@ -725,6 +789,7 @@ async function exportBracketPng() {
       const fallbackCanvas = createExportCanvas(flagImages, null, trophyImage);
       await downloadCanvas(fallbackCanvas, "توقعات-كأس-العالم-2026.png");
       showToast("تم حفظ الصورة بنجاح.");
+      closeShareModal();
     } catch (fallbackError) {
       console.error(fallbackError);
       showToast("تعذر حفظ الصورة. حاول لاحقاً.");
@@ -1039,8 +1104,14 @@ quickFillButton.addEventListener("click", quickFill);
 buildBracketButton.addEventListener("click", buildBracket);
 editGroupsButton.addEventListener("click", () => showView("groups"));
 exportButton.addEventListener("click", exportBracketPng);
+openShareButton.addEventListener("click", openShareModal);
+shareModalClose.addEventListener("click", closeShareModal);
+shareModalBackdrop.addEventListener("click", closeShareModal);
 usernameInput.addEventListener("input", () => {
   localStorage.setItem("road-to-26-username", usernameInput.value);
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !shareModal.hidden) closeShareModal();
 });
 mobileRoundNav.querySelectorAll("button").forEach((button) => {
   button.addEventListener("click", () => setMobileRound(Number(button.dataset.mobileRound)));
