@@ -802,8 +802,8 @@ async function exportBracketPng() {
 
 function createExportCanvas(flagImages, logo, trophyImage) {
   const canvas = document.createElement("canvas");
-  canvas.width = 2000;
-  canvas.height = 1200;
+  canvas.width = 2400;
+  canvas.height = 1500;
   const context = canvas.getContext("2d");
   const rounds = state.bracket.rounds;
   const champion = findTeam(state.bracket.champion);
@@ -823,48 +823,48 @@ function createExportCanvas(flagImages, logo, trophyImage) {
     "نصف النهائي", "ربع النهائي", "دور الـ16", "دور الـ32",
   ];
 
-    const gradient = context.createLinearGradient(0, 0, 2000, 1200);
+    const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#071019");
     gradient.addColorStop(0.5, "#05090e");
     gradient.addColorStop(1, "#07131a");
     context.fillStyle = gradient;
-    context.fillRect(0, 0, 2000, 1200);
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
     context.strokeStyle = "rgba(255,255,255,.025)";
     context.lineWidth = 1;
-    for (let x = 0; x <= 2000; x += 50) {
+    for (let x = 0; x <= canvas.width; x += 50) {
       context.beginPath();
       context.moveTo(x, 0);
-      context.lineTo(x, 1200);
+      context.lineTo(x, canvas.height);
       context.stroke();
     }
-    for (let y = 0; y <= 1200; y += 50) {
+    for (let y = 0; y <= canvas.height; y += 50) {
       context.beginPath();
       context.moveTo(0, y);
-      context.lineTo(2000, y);
+      context.lineTo(canvas.width, y);
       context.stroke();
     }
 
     context.textAlign = "center";
     const username = usernameInput.value.trim() || "مستخدم";
     context.fillStyle = "#f5f7f9";
-    context.font = "800 38px Cairo";
-    context.fillText(`توقعات ${username} لكأس العالم 2026`, 1000, 88, 1500);
-    if (logo) context.drawImage(logo, 1865, 18, 64, 100);
+    context.font = "800 46px Cairo";
+    context.fillText(`توقعات ${username} لكأس العالم 2026`, canvas.width / 2, 105, 1750);
+    if (logo) context.drawImage(logo, 2260, 18, 80, 125);
 
     context.textAlign = "left";
     context.fillStyle = "#83909d";
-    context.font = "600 18px Cairo";
-    context.fillText("الأدوار الإقصائية الرسمية", 74, 88);
+    context.font = "600 21px Cairo";
+    context.fillText("الأدوار الإقصائية الرسمية", 55, 102);
 
-    const columnWidth = 190;
-    const columnGap = 27;
-    const startX = 30;
+    const columnWidth = 250;
+    const columnGap = 16;
+    const startX = 11;
     roundLabels.forEach((label, index) => {
       context.textAlign = "center";
       context.fillStyle = index === 4 ? "#d6ff5e" : "#82909c";
-      context.font = "700 14px Cairo";
-      context.fillText(label, startX + index * (columnWidth + columnGap) + columnWidth / 2, 174);
+      context.font = "700 17px Cairo";
+      context.fillText(label, startX + index * (columnWidth + columnGap) + columnWidth / 2, 208);
     });
 
     drawCanvasConnectors(context, visualColumns, startX, columnWidth, columnGap);
@@ -878,41 +878,40 @@ function createExportCanvas(flagImages, logo, trophyImage) {
           flagImages[state.bracket.champion],
           trophyImage,
           x,
-          220,
+          250,
           columnWidth,
         );
-        drawCanvasFinal(context, matches[0], flagImages, x - 24, 620, columnWidth + 48);
+        drawCanvasFinal(context, matches[0], flagImages, x - 8, 780, columnWidth + 16);
         return;
       }
 
-      const availableHeight = 920;
-      const top = 215;
+      const availableHeight = 1160;
+      const top = 240;
       matches.forEach((match, matchIndex) => {
         const centerY = top + ((matchIndex + 0.5) * availableHeight) / matches.length;
-        drawCanvasMatch(context, match, flagImages, x, centerY - 34, columnWidth);
+        drawCanvasMatch(context, match, flagImages, x, centerY - 46, columnWidth);
       });
     });
 
     context.textAlign = "center";
     context.fillStyle = "#53606c";
-    context.font = "500 13px Cairo";
-    context.fillText("تم إنشاء هذه الصورة من توقعات المستخدم", 1000, 1170);
+    context.font = "500 16px Cairo";
+    context.fillText("تم إنشاء هذه الصورة من توقعات المستخدم", canvas.width / 2, 1460);
 
   return canvas;
 }
 
 function drawCanvasConnectors(context, visualColumns, startX, columnWidth, columnGap) {
-  const cardHeight = 68;
-  const availableHeight = 920;
-  const top = 215;
+  const availableHeight = 1160;
+  const top = 240;
   const centerFor = (columnIndex, matchIndex) => {
-    if (columnIndex === 4) return 620 + 106 / 2;
+    if (columnIndex === 4) return 780 + 140 / 2;
     return top + ((matchIndex + 0.5) * availableHeight) / visualColumns[columnIndex].length;
   };
   const xFor = (columnIndex) => startX + columnIndex * (columnWidth + columnGap);
 
   context.strokeStyle = "rgba(0,213,140,.68)";
-  context.lineWidth = 2;
+  context.lineWidth = 3;
 
   const connect = (sourceColumn, targetColumn) => {
     visualColumns[sourceColumn].forEach((_, matchIndex) => {
@@ -974,35 +973,36 @@ function triggerDownload(url, filename) {
 
 function drawCanvasMatch(context, match, flagImages, x, y, width) {
   context.fillStyle = "#0e1720";
-  roundedRect(context, x, y, width, 68, 9);
+  roundedRect(context, x, y, width, 92, 12);
   context.fill();
   context.strokeStyle = "rgba(255,255,255,.1)";
   context.stroke();
 
   context.textAlign = "left";
   context.fillStyle = "#596570";
-  context.font = "700 8px Manrope";
-  context.fillText(`M${match.number}`, x + 8, y + 11);
+  context.font = "700 10px Manrope";
+  context.fillText(`M${match.number}`, x + 11, y + 15);
 
   match.teams.forEach((key, index) => {
-    const rowY = y + 17 + index * 25;
+    const rowY = y + 23 + index * 32;
     const team = key ? findTeam(key) : null;
     const winner = key && match.winner === key;
     if (winner) {
       context.fillStyle = "rgba(0,213,140,.12)";
-      context.fillRect(x + 1, rowY - 1, width - 2, 25);
+      roundedRect(context, x + 2, rowY - 1, width - 4, 31, 5);
+      context.fill();
     }
-    if (team && flagImages[key]) context.drawImage(flagImages[key], x + 8, rowY + 3, 28, 18);
+    if (team && flagImages[key]) context.drawImage(flagImages[key], x + 11, rowY + 3, 38, 24);
     context.textAlign = "right";
     context.fillStyle = winner ? "#00d58c" : team ? "#f5f7f9" : "#66727d";
-    context.font = "700 11px Cairo";
-    context.fillText(team ? teamName(team) : "لم يتحدد", x + width - 8, rowY + 17, width - 50);
+    context.font = "700 14px Cairo";
+    context.fillText(team ? teamName(team) : "لم يتحدد", x + width - 11, rowY + 21, width - 72);
   });
 }
 
 function drawCanvasFinal(context, match, flagImages, x, y, width) {
   context.fillStyle = "#111d26";
-  roundedRect(context, x, y, width, 106, 14);
+  roundedRect(context, x, y, width, 140, 17);
   context.fill();
   context.strokeStyle = "rgba(214,255,94,.42)";
   context.lineWidth = 2;
@@ -1010,35 +1010,35 @@ function drawCanvasFinal(context, match, flagImages, x, y, width) {
 
   context.textAlign = "center";
   context.fillStyle = "#d6ff5e";
-  context.font = "800 11px Cairo";
-  context.fillText(`النهائي · M${match.number}`, x + width / 2, y + 20);
+  context.font = "800 14px Cairo";
+  context.fillText(`النهائي · M${match.number}`, x + width / 2, y + 25);
 
   match.teams.forEach((key, index) => {
-    const rowY = y + 29 + index * 36;
+    const rowY = y + 36 + index * 47;
     const team = key ? findTeam(key) : null;
     const winner = key && match.winner === key;
 
     if (winner) {
       context.fillStyle = "rgba(0,213,140,.14)";
-      roundedRect(context, x + 7, rowY - 2, width - 14, 34, 7);
+      roundedRect(context, x + 8, rowY - 2, width - 16, 43, 8);
       context.fill();
     }
 
     if (team && flagImages[key]) {
-      context.drawImage(flagImages[key], x + 13, rowY + 3, 43, 27);
+      context.drawImage(flagImages[key], x + 15, rowY + 4, 54, 34);
     }
 
     context.textAlign = "right";
     context.fillStyle = winner ? "#00d58c" : team ? "#f5f7f9" : "#66727d";
-    context.font = "800 15px Cairo";
-    context.fillText(team ? teamName(team) : "لم يتحدد", x + width - 13, rowY + 23, width - 82);
+    context.font = "800 18px Cairo";
+    context.fillText(team ? teamName(team) : "لم يتحدد", x + width - 15, rowY + 29, width - 100);
   });
 }
 
 function drawChampionPanel(context, champion, flag, trophyImage, x, y, width) {
   context.textAlign = "center";
-  const trophySize = 150;
-  const flagPanelY = y + trophySize + 24;
+  const trophySize = 180;
+  const flagPanelY = y + trophySize + 28;
 
   if (trophyImage) {
     context.drawImage(trophyImage, x + (width - trophySize) / 2, y, trophySize, trophySize);
@@ -1046,19 +1046,19 @@ function drawChampionPanel(context, champion, flag, trophyImage, x, y, width) {
 
   if (flag) {
     context.fillStyle = "rgba(214,255,94,.1)";
-    roundedRect(context, x + 25, flagPanelY, width - 50, 108, 18);
+    roundedRect(context, x + 25, flagPanelY, width - 50, 130, 18);
     context.fill();
     context.strokeStyle = "rgba(214,255,94,.3)";
     context.lineWidth = 2;
     context.stroke();
-    context.drawImage(flag, x + 35, flagPanelY + 12, width - 70, 76);
+    context.drawImage(flag, x + 38, flagPanelY + 13, width - 76, 104);
   }
   context.fillStyle = "#d6ff5e";
-  context.font = "800 15px Cairo";
-  context.fillText("بطل العالم", x + width / 2, flagPanelY + 138);
+  context.font = "800 18px Cairo";
+  context.fillText("بطل العالم", x + width / 2, flagPanelY + 164);
   context.fillStyle = "#f5f7f9";
-  context.font = "800 27px Cairo";
-  context.fillText(teamName(champion), x + width / 2, flagPanelY + 180, width + 70);
+  context.font = "800 32px Cairo";
+  context.fillText(teamName(champion), x + width / 2, flagPanelY + 210, width + 90);
 }
 
 function roundedRect(context, x, y, width, height, radius) {
