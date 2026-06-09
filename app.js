@@ -213,7 +213,7 @@ function renderOrderSlot(group, picks, index) {
             class="wildcard-toggle ${isWildcard ? "active" : ""}"
             data-group="${group.letter}"
             aria-label="${isWildcard ? "إلغاء تأهل" : "تأهيل"} ${teamName(team)} ضمن أفضل الثوالث"
-          >${isWildcard ? "متأهل" : "غير متأهل"}</button>`
+          >${isWildcard ? "مؤهل" : "غير متأهل"}</button>`
         : ""
       }
       <span class="order-actions">

@@ -275,6 +275,21 @@ h2 {
   margin: 0;
 }
 
+.groups-instruction {
+  font-size: 18px;
+  line-height: 2;
+  max-width: 760px;
+}
+
+.instruction-toggle {
+  cursor: default;
+  display: inline-flex;
+  margin: 0 4px;
+  min-height: 24px;
+  pointer-events: none;
+  vertical-align: middle;
+}
+
 .toolbar-actions,
 .bracket-actions {
   align-items: center;
@@ -1062,6 +1077,11 @@ h2 {
   .groups-toolbar {
     display: grid;
     gap: 18px;
+  }
+
+  .groups-instruction {
+    font-size: 15px;
+    line-height: 2.1;
   }
 
   .toolbar-actions {
