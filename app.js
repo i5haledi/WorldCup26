@@ -41,6 +41,7 @@ let toastTimer;
 
 const groupsGrid = document.querySelector("#groupsGrid");
 const buildBracketButton = document.querySelector("#buildBracketButton");
+const groupsCompleteAction = document.querySelector("#groupsCompleteAction");
 const quickFillButton = document.querySelector("#quickFillButton");
 const resetButton = document.querySelector("#resetButton");
 const editGroupsButton = document.querySelector("#editGroupsButton");
@@ -332,32 +333,8 @@ function toggleWildcard(groupLetter) {
 
 function updateProgress() {
   const completeGroups = GROUPS.filter((group) => (state.picks[group.letter] || []).length === 4).length;
-  const groupPickCount = Object.values(state.picks).reduce((sum, picks) => sum + Math.min(picks.length, 3), 0);
-  const totalSteps = 36 + 8;
-  const completedSteps = groupPickCount + state.wildcards.length;
-  const percent = Math.round((completedSteps / totalSteps) * 100);
   const ready = completeGroups === 12 && state.wildcards.length === 8;
-
-  document.querySelector("#progressPercent").textContent = `${percent}%`;
-  document.querySelector("#progressBar").style.width = `${percent}%`;
-  document.querySelector("#groupsComplete").textContent = completeGroups;
-  document.querySelector("#thirdsSelected").textContent = `${state.wildcards.length}/8`;
-  document.querySelector("#qualifierCount").textContent = completeGroups * 2 + state.wildcards.length;
-  buildBracketButton.disabled = !ready;
-
-  const dockTitle = document.querySelector("#dockTitle");
-  const dockCopy = document.querySelector("#dockCopy");
-
-  if (ready) {
-    dockTitle.textContent = "اكتملت قائمة دور الـ32";
-    dockCopy.textContent = "أنشئ الأدوار الإقصائية واختر بطلك حتى النهائي.";
-  } else if (completeGroups < 12) {
-    dockTitle.textContent = `تبقى ${12 - completeGroups} من المجموعات`;
-    dockCopy.textContent = "اختر ثلاثة أعلام وسيُضاف المنتخب المتبقي رابعاً تلقائياً.";
-  } else {
-    dockTitle.textContent = `اختر ${8 - state.wildcards.length} من أفضل الثوالث`;
-    dockCopy.textContent = "استخدم زر التأهيل بجانب منتخب المركز الثالث.";
-  }
+  groupsCompleteAction.hidden = !ready;
 }
 
 function quickFill() {
